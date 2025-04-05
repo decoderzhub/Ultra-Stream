@@ -17,27 +17,32 @@ const app = initializeApp(firebaseConfig);
 // Initialize Firestore first
 const db = getFirestore(app);
 
-// Enable offline persistence for Firestore before any other operations
-try {
-  // Enable single-tab persistence first
-  await enableIndexedDbPersistence(db);
-  
-  // Then enable multi-tab persistence
-  await enableMultiTabIndexedDbPersistence(db);
-} catch (err) {
-  if (err.code === 'failed-precondition') {
-    // Multiple tabs open, persistence can only be enabled in one tab at a time
-    console.warn('Multiple tabs open, persistence can only be enabled in one tab at a time.');
-  } else if (err.code === 'unimplemented') {
-    // The current browser doesn't support persistence
-    console.warn('The current browser doesn\'t support persistence.');
-  }
-}
-
-// Initialize auth after Firestore persistence is set up
+// Initialize auth
 const auth = getAuth(app);
 
 // Set auth persistence to LOCAL (survives browser restart)
 setPersistence(auth, browserLocalPersistence);
+
+// Enable offline persistence for Firestore in an async function instead of using top-level await
+const setupFirestorePersistence = async () => {
+  try {
+    // Enable single-tab persistence first
+    await enableIndexedDbPersistence(db);
+    
+    // Then enable multi-tab persistence
+    await enableMultiTabIndexedDbPersistence(db);
+  } catch (err) {
+    if (err.code === 'failed-precondition') {
+      // Multiple tabs open, persistence can only be enabled in one tab at a time
+      console.warn('Multiple tabs open, persistence can only be enabled in one tab at a time.');
+    } else if (err.code === 'unimplemented') {
+      // The current browser doesn't support persistence
+      console.warn('The current browser doesn\'t support persistence.');
+    }
+  }
+};
+
+// Call the async function immediately
+setupFirestorePersistence();
 
 export { auth, db };
