@@ -1,8 +1,5 @@
 import { useState, useEffect } from 'react';
 import { User } from 'firebase/auth';
-<<<<<<< HEAD
-import { auth } from '../firebase';
-=======
 import { auth, db } from '../firebase';
 import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 
@@ -30,16 +27,12 @@ interface UserProfile {
     privateAccount: boolean;
   };
 }
->>>>>>> 36fab14 (updates)
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-<<<<<<< HEAD
-    const unsubscribe = auth.onAuthStateChanged((user) => {
-=======
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
       if (user) {
         // Check if user profile exists
@@ -82,7 +75,6 @@ export function useAuth() {
         }
       }
       
->>>>>>> 36fab14 (updates)
       setUser(user);
       setLoading(false);
     });

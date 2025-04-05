@@ -3,9 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { LogoPlaceholder } from '../components/LogoPlaceholder';
 import { User, Send, Phone, Video, MoreVertical } from 'lucide-react';
 import { auth, db } from '../firebase';
-<<<<<<< HEAD
-import { collection, query, where, orderBy, onSnapshot, addDoc, serverTimestamp } from 'firebase/firestore';
-=======
 import { 
   collection, 
   query, 
@@ -22,7 +19,6 @@ import {
   increment
 } from 'firebase/firestore';
 import { UserSearchModal } from '../components/UserSearchModal';
->>>>>>> 36fab14 (updates)
 
 interface Message {
   id: string;
@@ -52,10 +48,7 @@ export function MessagesScreen() {
   const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
-<<<<<<< HEAD
-=======
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
->>>>>>> 36fab14 (updates)
   const currentUser = auth.currentUser;
 
   useEffect(() => {
@@ -63,16 +56,6 @@ export function MessagesScreen() {
 
     const q = query(
       collection(db, 'chats'),
-<<<<<<< HEAD
-      where('users', 'array-contains', currentUser.uid)
-    );
-
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const chatList: Chat[] = [];
-      snapshot.forEach((doc) => {
-        const data = doc.data();
-        const otherUserId = data.users.find((id: string) => id !== currentUser.uid);
-=======
       where('users', 'array-contains', currentUser.uid),
       orderBy('lastMessageTime', 'desc')
     );
@@ -88,7 +71,6 @@ export function MessagesScreen() {
         const userDoc = await getDoc(doc(db, 'users', otherUserId));
         const userData = userDoc.data();
 
->>>>>>> 36fab14 (updates)
         chatList.push({
           id: doc.id,
           users: data.users,
@@ -97,14 +79,6 @@ export function MessagesScreen() {
           unreadCount: data.unreadCount || 0,
           user: {
             id: otherUserId,
-<<<<<<< HEAD
-            name: data.userNames[otherUserId] || 'User',
-            avatar: data.userAvatars[otherUserId] || '',
-            online: data.userStatuses?.[otherUserId] || false,
-          },
-        });
-      });
-=======
             name: userData?.displayName || 'User',
             avatar: userData?.photoURL || '',
             online: userData?.online || false,
@@ -112,7 +86,6 @@ export function MessagesScreen() {
         });
       }
       
->>>>>>> 36fab14 (updates)
       setChats(chatList);
     });
 
@@ -141,8 +114,6 @@ export function MessagesScreen() {
     return () => unsubscribe();
   }, [selectedChat, currentUser]);
 
-<<<<<<< HEAD
-=======
   const startNewChat = async (userId: string) => {
     if (!currentUser) return;
 
@@ -189,28 +160,21 @@ export function MessagesScreen() {
     });
   };
 
->>>>>>> 36fab14 (updates)
   const handleSendMessage = async () => {
     if (!newMessage.trim() || !selectedChat || !currentUser) return;
 
     try {
-<<<<<<< HEAD
-      await addDoc(collection(db, `chats/${selectedChat.id}/messages`), {
-=======
       const chatRef = doc(db, 'chats', selectedChat.id);
       const messagesRef = collection(chatRef, 'messages');
 
       // Add message
       await addDoc(messagesRef, {
->>>>>>> 36fab14 (updates)
         text: newMessage,
         senderId: currentUser.uid,
         createdAt: serverTimestamp(),
         read: false,
       });
 
-<<<<<<< HEAD
-=======
       // Update chat metadata
       await updateDoc(chatRef, {
         lastMessage: newMessage,
@@ -218,20 +182,12 @@ export function MessagesScreen() {
         [`unreadCount.${selectedChat.user.id}`]: increment(1)
       });
 
->>>>>>> 36fab14 (updates)
       setNewMessage('');
     } catch (error) {
       console.error('Error sending message:', error);
     }
   };
 
-<<<<<<< HEAD
-  const startVideoCall = (userId: string) => {
-    navigate(`/call/${userId}`);
-  };
-
-=======
->>>>>>> 36fab14 (updates)
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Header */}
@@ -260,8 +216,6 @@ export function MessagesScreen() {
               placeholder="Search messages..."
               className="w-full px-4 py-2 rounded-full border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring placeholder:text-muted-foreground"
             />
-<<<<<<< HEAD
-=======
             
             <div className="flex justify-center mt-4">
               <button
@@ -271,7 +225,6 @@ export function MessagesScreen() {
                 Start New Chat
               </button>
             </div>
->>>>>>> 36fab14 (updates)
           </div>
 
           <div className="overflow-y-auto h-full">
@@ -329,11 +282,7 @@ export function MessagesScreen() {
               </div>
               <div className="flex items-center gap-4">
                 <button 
-<<<<<<< HEAD
-                  onClick={() => startVideoCall(selectedChat.user.id)}
-=======
                   onClick={() => navigate(`/call/${selectedChat.user.id}`)}
->>>>>>> 36fab14 (updates)
                   className="p-2 hover:bg-accent rounded-full"
                 >
                   <Video size={20} className="text-muted-foreground" />
@@ -401,15 +350,12 @@ export function MessagesScreen() {
           </div>
         )}
       </div>
-<<<<<<< HEAD
-=======
 
       <UserSearchModal
         isOpen={isSearchModalOpen}
         onClose={() => setIsSearchModalOpen(false)}
         onStartChat={startNewChat}
       />
->>>>>>> 36fab14 (updates)
     </div>
   );
 }
