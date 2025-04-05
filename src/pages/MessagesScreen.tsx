@@ -3,7 +3,26 @@ import { useNavigate } from 'react-router-dom';
 import { LogoPlaceholder } from '../components/LogoPlaceholder';
 import { User, Send, Phone, Video, MoreVertical } from 'lucide-react';
 import { auth, db } from '../firebase';
+<<<<<<< HEAD
 import { collection, query, where, orderBy, onSnapshot, addDoc, serverTimestamp } from 'firebase/firestore';
+=======
+import { 
+  collection, 
+  query, 
+  where, 
+  orderBy, 
+  onSnapshot, 
+  addDoc, 
+  serverTimestamp,
+  doc,
+  getDoc,
+  getDocs,
+  setDoc,
+  updateDoc,
+  increment
+} from 'firebase/firestore';
+import { UserSearchModal } from '../components/UserSearchModal';
+>>>>>>> 36fab14 (updates)
 
 interface Message {
   id: string;
@@ -33,6 +52,10 @@ export function MessagesScreen() {
   const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
+<<<<<<< HEAD
+=======
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
+>>>>>>> 36fab14 (updates)
   const currentUser = auth.currentUser;
 
   useEffect(() => {
@@ -40,6 +63,7 @@ export function MessagesScreen() {
 
     const q = query(
       collection(db, 'chats'),
+<<<<<<< HEAD
       where('users', 'array-contains', currentUser.uid)
     );
 
@@ -48,6 +72,23 @@ export function MessagesScreen() {
       snapshot.forEach((doc) => {
         const data = doc.data();
         const otherUserId = data.users.find((id: string) => id !== currentUser.uid);
+=======
+      where('users', 'array-contains', currentUser.uid),
+      orderBy('lastMessageTime', 'desc')
+    );
+
+    const unsubscribe = onSnapshot(q, async (snapshot) => {
+      const chatList: Chat[] = [];
+      
+      for (const doc of snapshot.docs) {
+        const data = doc.data();
+        const otherUserId = data.users.find((id: string) => id !== currentUser.uid);
+        
+        // Get other user's profile
+        const userDoc = await getDoc(doc(db, 'users', otherUserId));
+        const userData = userDoc.data();
+
+>>>>>>> 36fab14 (updates)
         chatList.push({
           id: doc.id,
           users: data.users,
@@ -56,12 +97,22 @@ export function MessagesScreen() {
           unreadCount: data.unreadCount || 0,
           user: {
             id: otherUserId,
+<<<<<<< HEAD
             name: data.userNames[otherUserId] || 'User',
             avatar: data.userAvatars[otherUserId] || '',
             online: data.userStatuses?.[otherUserId] || false,
           },
         });
       });
+=======
+            name: userData?.displayName || 'User',
+            avatar: userData?.photoURL || '',
+            online: userData?.online || false,
+          },
+        });
+      }
+      
+>>>>>>> 36fab14 (updates)
       setChats(chatList);
     });
 
@@ -90,27 +141,97 @@ export function MessagesScreen() {
     return () => unsubscribe();
   }, [selectedChat, currentUser]);
 
+<<<<<<< HEAD
+=======
+  const startNewChat = async (userId: string) => {
+    if (!currentUser) return;
+
+    // Check if chat already exists
+    const chatsRef = collection(db, 'chats');
+    const q = query(
+      chatsRef,
+      where('users', 'array-contains', currentUser.uid)
+    );
+    
+    const querySnapshot = await getDocs(q);
+    const existingChat = querySnapshot.docs.find(doc => {
+      const data = doc.data();
+      return data.users.includes(userId);
+    });
+
+    if (existingChat) {
+      setSelectedChat({
+        id: existingChat.id,
+        ...existingChat.data()
+      } as Chat);
+      return;
+    }
+
+    // Create new chat
+    const chatRef = await addDoc(chatsRef, {
+      users: [currentUser.uid, userId],
+      createdAt: serverTimestamp(),
+      lastMessageTime: serverTimestamp(),
+      lastMessage: '',
+      unreadCount: 0
+    });
+
+    setSelectedChat({
+      id: chatRef.id,
+      users: [currentUser.uid, userId],
+      unreadCount: 0,
+      user: {
+        id: userId,
+        name: 'User',
+        avatar: '',
+        online: false
+      }
+    });
+  };
+
+>>>>>>> 36fab14 (updates)
   const handleSendMessage = async () => {
     if (!newMessage.trim() || !selectedChat || !currentUser) return;
 
     try {
+<<<<<<< HEAD
       await addDoc(collection(db, `chats/${selectedChat.id}/messages`), {
+=======
+      const chatRef = doc(db, 'chats', selectedChat.id);
+      const messagesRef = collection(chatRef, 'messages');
+
+      // Add message
+      await addDoc(messagesRef, {
+>>>>>>> 36fab14 (updates)
         text: newMessage,
         senderId: currentUser.uid,
         createdAt: serverTimestamp(),
         read: false,
       });
 
+<<<<<<< HEAD
+=======
+      // Update chat metadata
+      await updateDoc(chatRef, {
+        lastMessage: newMessage,
+        lastMessageTime: serverTimestamp(),
+        [`unreadCount.${selectedChat.user.id}`]: increment(1)
+      });
+
+>>>>>>> 36fab14 (updates)
       setNewMessage('');
     } catch (error) {
       console.error('Error sending message:', error);
     }
   };
 
+<<<<<<< HEAD
   const startVideoCall = (userId: string) => {
     navigate(`/call/${userId}`);
   };
 
+=======
+>>>>>>> 36fab14 (updates)
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Header */}
@@ -139,6 +260,18 @@ export function MessagesScreen() {
               placeholder="Search messages..."
               className="w-full px-4 py-2 rounded-full border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring placeholder:text-muted-foreground"
             />
+<<<<<<< HEAD
+=======
+            
+            <div className="flex justify-center mt-4">
+              <button
+                onClick={() => setIsSearchModalOpen(true)}
+                className="px-4 py-2 bg-primary text-primary-foreground rounded-full hover:bg-primary/90 transition-colors"
+              >
+                Start New Chat
+              </button>
+            </div>
+>>>>>>> 36fab14 (updates)
           </div>
 
           <div className="overflow-y-auto h-full">
@@ -196,7 +329,11 @@ export function MessagesScreen() {
               </div>
               <div className="flex items-center gap-4">
                 <button 
+<<<<<<< HEAD
                   onClick={() => startVideoCall(selectedChat.user.id)}
+=======
+                  onClick={() => navigate(`/call/${selectedChat.user.id}`)}
+>>>>>>> 36fab14 (updates)
                   className="p-2 hover:bg-accent rounded-full"
                 >
                   <Video size={20} className="text-muted-foreground" />
@@ -264,6 +401,15 @@ export function MessagesScreen() {
           </div>
         )}
       </div>
+<<<<<<< HEAD
+=======
+
+      <UserSearchModal
+        isOpen={isSearchModalOpen}
+        onClose={() => setIsSearchModalOpen(false)}
+        onStartChat={startNewChat}
+      />
+>>>>>>> 36fab14 (updates)
     </div>
   );
 }
